@@ -53,12 +53,6 @@ def pandas():
                     for p in range(len(shoplist)-1):
                          #  rowselect = (df1.index[df1['Item'] == shoplist[p]])
                         row4search = ((df1.index[df1['Item'].str.contains(shoplist[p])])+1)
-                         #Variable used to search for numerical information in sheet
-                            #Display int64 values
-                        #print(rowselect)
-                            #print(row4search)
-                            #Display parsed row of item info
-                            #print(df1.loc[rowselect])
 
                         wb = load_workbook('Grocery.xlsx') #Loads spreadsheet
                         sheet_1 = wb['Page 1'] #Extracts desired sheet
