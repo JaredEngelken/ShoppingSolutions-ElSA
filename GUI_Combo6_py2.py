@@ -8,23 +8,40 @@ import os
 import time
 
 
-
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
 ### GUI definitions ###
 root = Tk()
 root.title("ElSA")
 myFont = tkFont.Font(family = 'Helvetica', size = 12, weight = "bold")
 
 class Boom(Frame):
-    global clear
-    global listbox_update
-    global test_list
-    wb = load_workbook('Grocery.xlsx') #Loads spreadsheet
-    sheet_1 = wb['Page 1'] #Extracts desired sheet
-    for t in range(1,sheet_1.max_row):
-        test_list[t]=sheet_1.cell(row=t+1, column=1).value
-    
     global listbox
-    ### Event Functions ###
+    global test_list3
+    global listbox_update
+    global sheet_1
+    global itemlist
+    global pricelist
+    global centerFrame
+    global rightFrame
+
+
+    # create all of the main containers
+    rightFrame = Frame(root, bg='lightskyblue', width = 200, height = 500, padx = 5, pady = 5)
+    centerFrame = Frame(root, bg='deepskyblue', width = 200, height = 500, padx = 5, pady = 5)
+    leftFrame = Frame(root, bg='skyblue', width = 200, height = 500, padx = 5, pady = 5)
+
+    # layout all of the main containers
+    root.grid_rowconfigure(1, weight=1)
+    root.grid_columnconfigure(0, weight=1)
+    
+    rightFrame.grid(row=1, column = 2, sticky="ns")
+    centerFrame.grid(row=1, column = 1, sticky="nsew")
+    leftFrame.grid(row=1, column = 0, sticky="ns")
+    
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
+### Event Functions ###
+    def close():
+        root.destroy() #close GUI
     def on_keyrelease(event):
         # get text from entry
         value = event.widget.get()
@@ -34,7 +51,7 @@ class Boom(Frame):
             data = []
         else:
             data = []
-            for item in test_list:
+            for item in test_list3:
                 if value in item.lower():
                     data.append(item)                
         # update data in listbox
@@ -47,85 +64,108 @@ class Boom(Frame):
         # put new data
         for item in data:
             listbox.insert('end', item)
-    def close():
-        root.destroy() #close GUI
-    def pandas():
+    def on_select(event):
+    # Takes user selection and removes price information in order to use selected item to search for other info
+    #______________________________________________________________________________________________________________#
+        grabitem = event.widget.get(event.widget.curselection()) #the initial selection of the user
+        for t in range(0, sheet_1.max_row):
+            itemlist[t] = sheet_1.cell(row = t+1, column = 1).value #Pulls all strings from column 1 describing item
+            itemlist2 = ['{} '.format(elem) for elem in itemlist] #Formats to remove 'u' type from string
+
+            pricelist[t] = ('   |${}|'.format(sheet_1.cell(row = t+1, column = 3).value)) #Pulls all strings from column 3 describing price
+            pricelist2 = ['{} '.format(elem) for elem in pricelist] #Formats to remove 'u' type from string
+        
+        test_list = map(str.__add__, itemlist2, pricelist2) #combines lists into one in order to find index within list of selected item
+        test_list3 = filter(lambda a: a != 'Item    |$Cost|', test_list) #clean up list
+        print test_list3
+
+        grabitemindex = test_list3.index(grabitem)+1 #finds index of selected item
+        pricelength = len(pricelist2[grabitemindex]) #finds length of displayed price info in order to determine how long of a string to delete
+
+        item = grabitem[:-pricelength] #deletes price info leaving only item title
+    #______________________________________________________________________________________________________________#
+
+    #Below runs item through Pandas
         file = 'Grocery.xlsx'
         xl = pd.ExcelFile(file)
-
-        # Display all sheets that exist in spreadsheet file
-        print(xl.sheet_names)
-
+        
         # Generate DataFrame from imported spreadsheet and print
         df1 = xl.parse('Page 1')
         print (df1)
-        shoplist = ["" for x in range(1)]
 
-        # Get the item from the search box and make a button with searched item if found
-        item = ment.get()
-  
-        wb = load_workbook('Grocery.xlsx') #Loads spreadsheet
-        sheet_1 = wb['Page 1'] #Extracts desired sheet
-        for totMatch in range(len(row4search)):
-            code = np.zeros(sheet_1.max_row) #Create blank array based on size of inventory list
-            cost = np.zeros(sheet_1.max_row)
-            aisle = np.zeros(sheet_1.max_row)
-            bay = np.zeros(sheet_1.max_row)
-         
-            for i in range(1,sheet_1.max_row):
-                code[i]=sheet_1.cell(row=i+1, column=2).value #Fill in data to blank arrays from spreadsheet
-                cost[i]=sheet_1.cell(row=i+1, column=3).value
-                aisle[i]=sheet_1.cell(row=i+1, column=4).value
-                bay[i]=sheet_1.cell(row=i+1, column=5).value                                
-                    
+        #regenerate list of items in inventory
+        list1 = [""]*(sheet_1.max_row)
+        for t in range(0, sheet_1.max_row):
+            list1[t] = sheet_1.cell(row = t+1, column = 1).value
+            list2 = filter(lambda a: a != "Item", list1)
+            list3 = ['{} '.format(elem) for elem in list2]
+        print list3
+        
+        rowselect = list3.index(item)
+        row4search = rowselect+2 #find in which row item exists
+        print row4search
+
+
+        code=sheet_1.cell(row=row4search, column=2).value #Fill in data to blank arrays from spreadsheet
+        cost=sheet_1.cell(row=row4search, column=3).value
+        aisle=sheet_1.cell(row=row4search, column=4).value
+        bay=sheet_1.cell(row=row4search, column=5).value
+
         # Full info display
-            print (sheet_1.cell(row=row4search[totMatch]+1, column=1).value)
-            print ('Barcode', code[row4search[totMatch]]) #Display desired item barcode
-            print ('Price', cost[row4search[totMatch]]) #Display desired item cost
-            print ('Aisle', aisle[row4search[totMatch]]) #Display desired item isle
-            print ('Bay', bay[row4search[totMatch]]) #Display desired item bay
+        print (sheet_1.cell(row=row4search, column=1).value)
+        print ('Barcode {}'.format(code)) #Display desired item barcode
+        print ('Price ${}'.format(cost)) #Display desired item cost
+        print ('Aisle {}'.format(aisle)) #Display desired item isle
+        print ('Bay {}'.format(bay)) #Display desired item bay
 
         # CART LIST
-            def addCartList():
-                shoppingCartButton = Button(root, text = item)
-                shoppingCartButton.grid(column = 4)
-            
+        def addCartList():
+            shoppingCartButton = Button(rightFrame, text = item, bg = 'thistle')
+            shoppingCartButton.grid(column = 1)
+        
         # SHOPPING LIST
-            def addShopList():
-                addCartButton = Button(root, text = item, command = addCartList)
-                addCartButton.grid(column = 3) 
-            
-            #Add item to shoplist button with info (!!!ONLY DISPLAYS SEARCH NOT ACTUAL NAME OF ITEM!!!)
-            itemButton = Button(root, text = 'ADD '+item+' $'+str(cost[row4search[totMatch]])+' Aisle '+str(aisle[row4search[totMatch]]), command = addShopList)
-            itemButton.grid(column = 1, columnspan = 2)
-            # MAKE THIS THING DISAPEAR ON NEXT SEARCH!!!
+        addCartButton = Button(centerFrame, text = 'ADD '+item+' $'+str(cost)+' Aisle '+str(aisle), command = addCartList, bg = 'plum')
+        addCartButton.grid(column = 1)
 
-    def on_select(event):
-        # display element selected on list
-        print('(event) previous:', event.widget.get('active'))
-        print('(event)  current:', event.widget.get(event.widget.curselection()))
-        print('---')
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
+# --- Main --- #
 
+    #Loads workbook to look for items in inventory 
+    wb = load_workbook('Grocery.xlsx')
+    sheet_1 = wb['Page 1']
+    itemlist = [""]*(sheet_1.max_row)
+    pricelist = [""]*(sheet_1.max_row)
+    for t in range(0, sheet_1.max_row):
+        itemlist[t] = sheet_1.cell(row = t+1, column = 1).value #Pulls all strings from column 1
+        itemlist2 = ['{} '.format(elem) for elem in itemlist] #Formats to remove 'u' type from string
+
+        pricelist[t] = ('   |${}|'.format(sheet_1.cell(row = t+1, column = 3).value)) #Pulls all strings from column 3
+        pricelist2 = ['{} '.format(elem) for elem in pricelist] #Formats to remove 'u' type from string
+    
+    test_list = map(str.__add__, itemlist2, pricelist2)
+    
+    test_list3 = filter(lambda a: a != 'Item    |$Cost| ', test_list) #Combines item with price info for user
+    print test_list3
 
     # Shopping Cart Label
-    shoppingCartLabel = Label(root, text = "Your Shopping Cart:", bg = 'green', fg = 'black', font = myFont)
-    shoppingCartLabel.grid(column = 4, row = 1)
+    shoppingCartLabel = Label(rightFrame, text = "Your Shopping Cart:", bg = 'orchid', fg = 'floralwhite', font = myFont)
+    shoppingCartLabel.grid(column = 1, row = 1, rowspan = 2)
 
     # Shopping List Label
-    addCartLabel = Label(root, text = "Shopping List\nClick to add items to cart: ", bg = 'white', fg = 'black', font = myFont)
-    addCartLabel.grid(column = 3, row = 1)
+    addCartLabel = Label(centerFrame, text = "Shopping List\nClick to add items to cart: ", bg = 'cornflowerblue', fg = 'lavenderblush', font = myFont)
+    addCartLabel.grid(column = 1, row = 1)
 
     # Search label
-    searchLabel = Label(root, text = 'Search:', bg = 'blue', fg = 'white', font = myFont)
-    searchLabel.grid(column = 1, row = 1)
+    searchLabel = Label(leftFrame, text = 'Search:', bg = 'mediumslateblue', fg = 'snow', font = myFont)
+    searchLabel.grid(column = 1, row = 1, rowspan = 2)
 
     # Search Entry
-    entry = Entry(root)
-    entry.grid(column = 1, row = 2)
+    entry = Entry(leftFrame)
+    entry.grid(column = 1, row = 3)
     entry.bind('<KeyRelease>', on_keyrelease)
 
-    listbox = Listbox(root)
-    listbox.grid(column = 1, row = 3)
+    listbox = Listbox(leftFrame)
+    listbox.grid(column = 1, row = 4)
     listbox.bind('<<ListboxSelect>>', on_select)
     listbox_update([])
 
