@@ -76,7 +76,7 @@ class Boom(Frame):
             pricelist2 = ['{} '.format(elem) for elem in pricelist] #Formats to remove 'u' type from string
         
         test_list = map(str.__add__, itemlist2, pricelist2) #combines lists into one in order to find index within list of selected item
-        test_list3 = filter(lambda a: a != 'Item    |$Cost|', test_list) #clean up list
+        test_list3 = filter(lambda a: a != 'Item    |$Cost| ', test_list) #clean up list
         print test_list3
 
         grabitemindex = test_list3.index(grabitem)+1 #finds index of selected item
