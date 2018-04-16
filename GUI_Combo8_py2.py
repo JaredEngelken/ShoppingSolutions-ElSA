@@ -38,10 +38,13 @@ class Boom(tk.Frame):
     global topFrame1
     global leftFrame1
     global rightFrame1
+    global centerFrame1
     global searchButton
     global change
     global screenWidth
     global screenHeight
+##    global itemMaster
+##    global priceMaster
 
     screenWidth = root.winfo_screenwidth()
     screenHeight = root.winfo_screenheight()
@@ -56,23 +59,30 @@ class Boom(tk.Frame):
     
     # create all of the main containers
     topFrame1 = tk.Frame(root, bg='lightskyblue') #topFrame1 = tk.Frame(root, bg='lightskyblue', width = 1920, height = 200, padx = 5, pady = 5)
+    topFrame2 = tk.Frame(root, bg='lightskyblue')
+    topFrame3 = tk.Frame(root, bg='lightskyblue')
     leftFrame1 = tk.Frame(root, bg='blue')
     centerFrame1 = tk.Frame(root, bg='deepskyblue')
     rightFrame1 = tk.Frame(root, bg='darkblue')
     bottomFrame1 = tk.Frame(root, bg='magenta')
 
     # layout all of the main containers
+    leftFrame1.columnconfigure(0, weight = 1, uniform = 'same')
+    centerFrame1.columnconfigure(1, weight = 2, uniform = 'same')
+    rightFrame1.columnconfigure(2, weight = 1, uniform = 'same')
     root.grid_rowconfigure(0, weight = 1, uniform = 'same1')
     root.grid_rowconfigure(1, weight = 7, uniform = 'same1')
     root.grid_rowconfigure(2, weight = 2, uniform = 'same1')
     root.grid_columnconfigure(0, weight = 1, uniform = 'same2')
     root.grid_columnconfigure(1, weight = 1, uniform = 'same2')
     root.grid_columnconfigure(2, weight = 1, uniform = 'same2')
-    leftFrame1.columnconfigure(0, weight = 1, uniform = 'same')
-    centerFrame1.columnconfigure(1, weight = 2, uniform = 'same')
-    rightFrame1.columnconfigure(2, weight = 1, uniform = 'same')
+    topFrame1.grid_rowconfigure(0, weight = 1, uniform = 'same3')
+    topFrame2.grid_rowconfigure(1, weight = 1, uniform = 'same3')
+    topFrame3.grid_rowconfigure(2, weight = 1, uniform = 'same3')
 
-    topFrame1.grid(row=0, columnspan = 3, sticky="nsew")
+    topFrame1.grid(row=0, column = 0, sticky="nsew")
+    topFrame2.grid(row=0, column = 1, sticky="nsew")
+    topFrame3.grid(row=0, column = 2, sticky="nsew")
     leftFrame1.grid(row=1, column = 0, sticky="nsew")
     centerFrame1.grid(row=1, column = 1, sticky="nsew")
     rightFrame1.grid(row=1, column = 2, sticky="nsew")
@@ -80,6 +90,10 @@ class Boom(tk.Frame):
 
     bottomFrameWidth = bottomFrame1.winfo_width()
     print bottomFrameWidth
+    
+    itemMaster = ['']
+    priceMaster = ['']
+
     
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
 ### Event Functions ###
@@ -118,16 +132,20 @@ class Boom(tk.Frame):
     def gsearch():
         searchButton.destroy()
         # Search Entry
-        entry = tk.Entry(topFrame1)
-        entry.grid()
+        #entry = tk.Entry(topFrame1)
+        entry = tk.Entry(centerFrame1)
+        entry.pack(side =tk.TOP)
         entry.bind('<KeyRelease>', on_keyrelease)
 
+
         global listbox
-        listbox = tk.Listbox(topFrame1)
-        listbox.grid()
+        #listbox = tk.Listbox(topFrame1)
+        listbox = tk.Listbox(centerFrame1)
+        listbox.pack()
         listbox.bind('<<ListboxSelect>>', on_select)
         listbox_update([])
         import keyboard_import
+    
     def on_select(event):
     # Takes user selection and removes price information in order to use selected item to search for other info
     #______________________________________________________________________________________________________________#
@@ -147,6 +165,21 @@ class Boom(tk.Frame):
         pricelength = len(pricelist2[grabitemindex]) #finds length of displayed price info in order to determine how long of a string to delete
 
         item = grabitem[:-pricelength] #deletes price info leaving only item title
+        
+##        for d in range(0, k):
+##            if itemMaster[d] == '':
+##                itemMaster[d] == item
+##                itemMaster.append('')
+##                print itemMaster
+##                break
+##
+##        for p in range(len(priceMaster)):
+##            if priceMaster[p] == '':
+##                priceMaster[p] == item
+##                priceMaster.append('')
+##                print priceMaster
+##                break
+        
     #______________________________________________________________________________________________________________#
 
     #Below runs item through Pandas
@@ -187,6 +220,7 @@ class Boom(tk.Frame):
             shoppingCartButton = tk.Button(rightFrame1, text = item, bg = 'thistle')
             #shoppingCartButton.grid(column = 1)
             shoppingCartButton.pack(fill = tk.X)
+            runningTot = runningTot+cost
         
         # SHOPPING LIST
         addCartButton = tk.Button(leftFrame1, text = 'ADD '+item+' $'+str(cost)+' Aisle '+str(aisle), command = addCartList, bg = 'plum')
@@ -217,26 +251,38 @@ class Boom(tk.Frame):
     shoppingCartLabel = tk.Label(rightFrame1, text = "Your Shopping Cart:", bg = 'orchid', fg = 'floralwhite', font = myFont)
     #shoppingCartLabel.grid(column = 1, row = 1, rowspan = 2, padx = 10)
     shoppingCartLabel.pack(fill = tk.X)
-    
+
+    # Total Cost Label
+    totalCostLabel = tk.Label(rightFrame1, text = "Total Cost: ", bg = 'cornflowerblue', fg = 'lavenderblush', font = myFont)
+    totalCostLabel.pack(fill = tk.X, side = tk.BOTTOM)
+
     # Shopping List Label
     addCartLabel = tk.Label(leftFrame1, text = "Shopping List\nClick to add items to cart: ", bg = 'cornflowerblue', fg = 'lavenderblush', font = myFont)
     #addCartLabel.grid(column = 1, row = 1, padx = 10)
     addCartLabel.pack(fill = tk.X)
     
-    # Search label
-    searchButton = tk.Button(topFrame1, text = 'Search', bg = 'mediumslateblue', fg = 'snow', font = myFont, command = gsearch)
+    # Search button
+    searchButton = tk.Button(centerFrame1, text = 'Search', bg = 'mediumslateblue', fg = 'snow', font = myFont, command = gsearch, height = 9)
+    #searchButton = tk.Button(topFrame1, text = 'Search', bg = 'mediumslateblue', fg = 'snow', font = myFont, command = gsearch, height = 5)
     #searchButton = tk.Button(topFrame1, text = 'Search', bg = 'mediumslateblue', fg = 'snow', font = myFont, command = change)
-    searchButton.grid()
+    #searchPicture = tk.PhotoImage(file = "Search.png")
+    #searchButton.config(image = searchPicture)
+    searchButton.pack(fill = tk.X)
+
+    # Store Logo
+    logoLabel = tk.Label(topFrame2, text = 'Place logo here!', font = myFont, height = 10, width = 30)
+    logoLabel.pack()
 
     # Ad Button
-    adButton = tk.Button(bottomFrame1, text = 'Place ad here!', font = myFont, height = 240, width = 1920)
-    photoNuts = tk.PhotoImage(file = "PlantersAd.png")
-    adButton.config(image = photoNuts)
+    adButton = tk.Button(bottomFrame1, text = 'Place ad here!', font = myFont, height = 96, width = 800)
+    photoMilk = tk.PhotoImage(file = "HorizonAd.png")
+    adButton.config(image = photoMilk)
     adButton.pack()
 
     # Recipe Builder Button
-    recipeButton = tk.Button(centerFrame1, text = 'Place recipes here!', font = myFont, height = 24)
-    recipeButton.pack(fill = tk.X)
+    recipeButton = tk.Button(centerFrame1, text = 'Place recipes here!', font = myFont, height = 10)
+    recipeButton.pack(side = tk.BOTTOM, fill = tk.X)
+
 
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
