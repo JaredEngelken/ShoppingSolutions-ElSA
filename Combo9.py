@@ -57,12 +57,14 @@ class GUI():
         self.combinedMaster = ['']
         self.aisleMaster = ['']
 
+        self.runningTotal = ['']
+
         # Shopping Cart Label
         self.shoppingCartLabel = tk.Label(self.rightFrame1, text = "Your Shopping Cart:", bg = 'orchid', fg = 'floralwhite', font = self.myFont)
         self.shoppingCartLabel.pack(fill = tk.X)
 
         # Total Cost Label
-        self.totalCostLabel = tk.Label(self.rightFrame1, text = "Total Cost: ", bg = 'orchid', fg = 'lavenderblush', font = self.myFont)
+        self.totalCostLabel = tk.Label(self.rightFrame1, text = "Total Cost:      ", bg = 'orchid', fg = 'lavenderblush', font = self.myFont)
         self.totalCostLabel.pack(fill = tk.X, side = tk.BOTTOM)
 
         # Shopping List Label
@@ -152,6 +154,8 @@ class GUI():
 
     def KEYBOARD(self):
         self.top = tk.Toplevel()
+        self.top.overrideredirect(1)
+        self.top.attributes('-topmost', 'true')
         ws = self.top.winfo_screenwidth()
         print ws # width of the screen
         hs = self.top.winfo_screenheight() # height of the screen
@@ -633,10 +637,21 @@ class GUI():
                     print self.combinedMaster
 
         # CART LIST
-        def addCartList(thing1):
+        def addCartList(thing1, thing2):
             shoppingCartButton = tk.Button(self.rightFrame1, text = thing1, bg = 'thistle')
             shoppingCartButton.pack(fill = tk.X)
-            #runningTot = runningTot+cost
+
+            for openslot in range(0, len(self.runningTotal)):
+                if self.runningTotal[openslot] == '':
+                    priceFloat = float(thing2)
+                    self.runningTotal[openslot] = priceFloat
+                    self.runningTotal.append('')
+                    
+            TotalCost = sum(self.runningTotal[:-1])
+
+            self.totalCostLabel.forget() 
+            self.totalCostLabel = tk.Label(self.rightFrame1, text = "Total Cost: "+str(TotalCost)+" ", bg = 'orchid', fg = 'lavenderblush', font = self.myFont)
+            self.totalCostLabel.pack(fill = tk.X, side = tk.BOTTOM)
 
         
         # SHOPPING LIST
@@ -653,7 +668,7 @@ class GUI():
             thing3 = str(iteminfo[2])[1:][:-3]
             print iteminfo
             stringprinted = 'Item: '+thing1+' || $'+thing2+' || Aisle: '+thing3+''
-            self.addCartButton = tk.Button(self.leftFrame2, text = stringprinted, command = lambda thing1 = thing1: addCartList(thing1), bg = 'plum')
+            self.addCartButton = tk.Button(self.leftFrame2, text = stringprinted, command = lambda thing1 = thing1: addCartList(thing1, thing2), bg = 'plum')
             self.addCartButton.pack(fill = tk.X)
             print self.addCartButton.cget('text')
     
