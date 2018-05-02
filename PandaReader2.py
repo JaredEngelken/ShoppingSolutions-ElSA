@@ -16,7 +16,7 @@ print(xl.sheet_names)
 
 #Generate DataFrame from imported spreadsheet and print
 df1 = xl.parse('Page 1')
-print df1
+print (df1)
 
 shoplist = ["" for x in range(1)]
 
@@ -32,12 +32,12 @@ while item != "Done":
                 if shoplist[j] == "":
                     shoplist[j] = item
                     shoplist.append("")
+                    print (shoplist)
                     break
         else:
             print("Item not found. Please add a new Item.")
     else:
         break
-print shoplist
 
     
 # Use to test location of specific item-->> print(df1.loc[df1['Item'] == 'Nuts'])
@@ -82,7 +82,7 @@ for p in range(len(shoplist)-1):
     #print bay
 
 #Full info display
-    print shoplist[p]
+    print (shoplist[p])
     print ('Barcode', code[row4search]) #Display desired item barcode
     print ('Price', cost[row4search]) #Display desired item cost
     print ('Aisle', aisle[row4search]) #Display desired item isle
